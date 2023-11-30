@@ -10,4 +10,11 @@ contract ErrorHandling {
         count++;
         require(i > 10);
     }
+
+    function testRequireWithMessage(uint i) public {
+        //refunds gas.
+        //reverts state changes.
+        count++;
+        require(i > 10, "Input should be greater than 10");
+    }
 }

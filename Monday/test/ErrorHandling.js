@@ -41,5 +41,19 @@ describe("ErrorHandling", function () {
       await expect(errorHandling.testRequire(1)).to.be.reverted;
       expect(await errorHandling.count()).to.equal(0);
     });
+
+    it("testRequireWithMessage Should not revert state change if input > 10", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await errorHandling.testRequireWithMessage(11);
+      expect(await errorHandling.count()).to.equal(1);
+    });
+
+    it("testRequire Should revert state change if input > 10 and return Error Message", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await expect(errorHandling.testRequireWithMessage(1)).to.be.revertedWith("Input should be greater than 10");
+      expect(await errorHandling.count()).to.equal(0);
+    });
   })
 })
