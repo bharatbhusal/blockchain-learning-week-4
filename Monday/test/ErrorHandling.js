@@ -27,7 +27,7 @@ describe("ErrorHandling", function () {
     });
   });
 
-  describe("Error Handling Techniques", function () {
+  describe("Require", function () {
     it("testRequire Should not revert state change if input > 10", async function () {
       const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
       expect(await errorHandling.count()).to.equal(0);
@@ -49,10 +49,56 @@ describe("ErrorHandling", function () {
       expect(await errorHandling.count()).to.equal(1);
     });
 
-    it("testRequire Should revert state change if input > 10 and return Error Message", async function () {
+    it("testRequireWithMessage Should revert state change if input > 10 and return Error Message", async function () {
       const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
       expect(await errorHandling.count()).to.equal(0);
       await expect(errorHandling.testRequireWithMessage(1)).to.be.revertedWith("Input should be greater than 10");
+      expect(await errorHandling.count()).to.equal(0);
+    });
+  })
+
+  describe("Revert", function () {
+    it("testRevert Should not revert state change if input > 10", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await errorHandling.testRevert(11);
+      expect(await errorHandling.count()).to.equal(1);
+    });
+
+    it("testRevert Should revert state change if input > 10", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await expect(errorHandling.testRevert(1)).to.be.reverted;
+      expect(await errorHandling.count()).to.equal(0);
+    });
+
+    it("testRevertWithMessage Should not revert state change if input > 10", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await errorHandling.testRevertWithMessage(11);
+      expect(await errorHandling.count()).to.equal(1);
+    });
+
+    it("testRevertWithMessage Should revert state change if input > 10 and return Error Message", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await expect(errorHandling.testRevertWithMessage(1)).to.be.revertedWith("Input should be greater than 10");
+      expect(await errorHandling.count()).to.equal(0);
+    });
+  })
+
+  describe("Assert", function () {
+    it("testAssert Should not revert state change if input > 10", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await errorHandling.testAssert(11);
+      expect(await errorHandling.count()).to.equal(1);
+    });
+
+    it("testAssert Should revert state change if input > 10", async function () {
+      const { errorHandling } = await loadFixture(deployErrorHandlingFixture);
+      expect(await errorHandling.count()).to.equal(0);
+      await expect(errorHandling.testAssert(1)).to.be.reverted;
       expect(await errorHandling.count()).to.equal(0);
     });
   })
