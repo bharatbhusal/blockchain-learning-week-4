@@ -37,4 +37,20 @@ contract ProductSupplyChain is Ownable {
     constructor() {
         administrator = msg.sender;
     }
+
+    function createProduct(
+        uint256 _productId,
+        string memory _name,
+        address _currentOwner,
+        uint256 _price
+    ) private onlyAdministrator {
+        Product memory newProduct = Product({
+            productId: _productId,
+            name: _name,
+            currentOwner: _currentOwner,
+            price: _price
+        });
+        STORAGE[_productId] = newProduct;
+        OWNER[_productId][_currentOwner] = true;
+    }
 }
