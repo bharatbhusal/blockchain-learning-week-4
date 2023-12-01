@@ -110,4 +110,10 @@ contract ProductSupplyChain is Ownable {
 
         emit ProductSold(_productId, msg.sender, _to, _price); //emiting event to signal selling of the product
     }
+
+    function getProductDetail(
+        uint256 _productId
+    ) public view returns (Product memory) {
+        return STORAGE[_productId];
+    }
 }
