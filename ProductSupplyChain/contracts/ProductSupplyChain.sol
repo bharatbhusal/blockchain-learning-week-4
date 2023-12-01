@@ -29,7 +29,7 @@ contract ProductSupplyChain is Ownable {
     address public administrator;
     // Product struct with properties like productId, name, currentOwner, price, and state.
     struct Product {
-        uint256 productId;
+        uint256 productId; //ID starting from 1.
         string name;
         address currentOwner;
         uint256 price;
@@ -43,9 +43,16 @@ contract ProductSupplyChain is Ownable {
         uint256 price
     );
 
+    //mapping productID to product object.
     mapping(uint256 => Product) public STORAGE;
+
     modifier onlyAdministrator() {
         require(msg.sender == administrator, "Not Administrator");
+        _;
+    }
+
+    modifier productExists(uint256 productId) {
+        require(STORAGE[productId].productId != 0, "Product does not exist");
         _;
     }
 
@@ -67,6 +74,18 @@ contract ProductSupplyChain is Ownable {
         });
         STORAGE[_productId] = newProduct;
         OWNER[_productId][_currentOwner] = true;
+
         emit ProductCreated(_productId, _currentOwner);
+    }
+
+    function sellProduct(
+        uint256 _productId,
+        address _to,
+        uint256 _price
+    ) private onlyOwner(_productId) productExists(_productId) {
+        delete OWNER[_productId][msg.sender];
+        OWNER[_productId][_to] = true;
+
+        emit ProductSold(_productId, msg.sender, _to, _price);
     }
 }
