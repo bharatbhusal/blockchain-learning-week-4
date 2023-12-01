@@ -4,10 +4,11 @@ pragma solidity 0.8.23;
 contract ErrorHandling {
     uint public count;
 
-    function testRequire(uint i) public {
+    function testRequire(uint i) public { //estimated gas = 3k
         //input validation.
-        count++;
+        count++; //gas consumed = 0.5k
         require(i > 10);
+        count = count + 100; //gas consumed = 0.5k
     }
 
     function testRequireWithMessage(uint i) public {
