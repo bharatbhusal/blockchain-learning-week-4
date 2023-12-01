@@ -4,6 +4,12 @@ pragma solidity 0.8.23;
 contract Ownable {
     mapping(uint256 => mapping(address => bool)) public OWNER;
 
+    event OwnershipTransferred(
+        uint256 productId,
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
     modifier onlyOwner(uint256 productId) {
         require(OWNER[productId][msg.sender], "Not Owner");
         _;
@@ -11,10 +17,11 @@ contract Ownable {
 
     function transferOwnership(
         address newOwner,
-        uint256 productId
-    ) external onlyOwner(productId) {
+        uint256 _productId
+    ) external onlyOwner(_productId) {
         require(newOwner != address(0), "Invalid newOwner address");
-        OWNER[productId][newOwner] = true;
+        OWNER[_productId][newOwner] = true;
+        emit OwnershipTransferred(_productId, msg.sender, newOwner);
     }
 }
 
@@ -27,8 +34,16 @@ contract ProductSupplyChain is Ownable {
         address currentOwner;
         uint256 price;
     }
-    mapping(uint256 => Product) public STORAGE;
 
+    event ProductCreated(uint256 indexed productId, address indexed owner);
+    event ProductSold(
+        uint256 indexed productId,
+        address from,
+        address to,
+        uint256 price
+    );
+
+    mapping(uint256 => Product) public STORAGE;
     modifier onlyAdministrator() {
         require(msg.sender == administrator, "Not Administrator");
         _;
@@ -52,5 +67,6 @@ contract ProductSupplyChain is Ownable {
         });
         STORAGE[_productId] = newProduct;
         OWNER[_productId][_currentOwner] = true;
+        emit ProductCreated(_productId, _currentOwner);
     }
 }
