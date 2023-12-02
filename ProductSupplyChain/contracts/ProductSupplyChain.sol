@@ -86,6 +86,7 @@ contract ProductSupplyChain is Ownable, Sellable {
     function assignSellerRole(
         address seller
     ) public onlyAdministrator onlyValidAddress(seller) {
+        require(SELLER[seller] == false, "Already a seller");
         SELLER[seller] = true;
 
         emit SellerAssigned(seller);
@@ -101,6 +102,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         onlySeller(newOwner)
         onlyOwner(_productId)
     {
+        require(newOwner != msg.sender, "Can't transfer Ownership to self");
         OWNER[_productId][newOwner] = true; //adding the owner of the product in mapping.
         delete OWNER[_productId][msg.sender];
         STORAGE[_productId].currentOwner = newOwner;
@@ -137,8 +139,10 @@ contract ProductSupplyChain is Ownable, Sellable {
         public
         onlyValidAddress(_to)
         productExists(_productId)
+        onlySeller(_to)
         onlyOwner(_productId)
     {
+        require(_to != msg.sender, "Can't sell to self");
         delete OWNER[_productId][msg.sender]; //deleting previous owner of the product.
         OWNER[_productId][_to] = true; //updating new owner of the product - buyer.
         STORAGE[_productId].currentOwner = _to; //changing owner in storage.
