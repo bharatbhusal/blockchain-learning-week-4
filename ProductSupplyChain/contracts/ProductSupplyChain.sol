@@ -116,6 +116,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         string memory _name,
         uint256 _price
     ) public onlySeller(msg.sender) onlynewProduct(_productId) {
+        require(_productId != 0, "Product Id can 't be 0");
         //creating a new product struct with input values.
         Product memory newProduct = Product({
             productId: _productId,
@@ -123,7 +124,6 @@ contract ProductSupplyChain is Ownable, Sellable {
             currentOwner: msg.sender,
             price: _price
         });
-
         STORAGE[_productId] = newProduct; //registering new product in storage.
         OWNER[_productId][msg.sender] = true; //adding owner-product relation in Owner mapping.
 
