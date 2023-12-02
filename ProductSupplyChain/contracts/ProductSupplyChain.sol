@@ -13,9 +13,23 @@ contract Ownable {
     }
 }
 
+//Seller role control of the user.
+contract Sellable {
+    //assigning seller role to users.
+    mapping(address => bool) public SELLER;
+
+    modifier onlySeller(address user) {
+        require(SELLER[user], "Not a Seller");
+        _;
+    }
+}
+
 // Main contract inheriting Ownable contract.
-contract ProductSupplyChain is Ownable {
+contract ProductSupplyChain is Ownable, Sellable {
     address public administrator; //owner of the contract.
+
+    //mapping productID to product struct.
+    mapping(uint256 => Product) public STORAGE;
 
     // Product struct with properties like productId, name, currentOwner, price, and state.
     struct Product {
@@ -40,8 +54,7 @@ contract ProductSupplyChain is Ownable {
         address indexed newOwner
     );
 
-    //mapping productID to product struct.
-    mapping(uint256 => Product) public STORAGE;
+    event SellerAssigned(address);
 
     //modifier to restrict actions only to contract owner.
     modifier onlyAdministrator() {
@@ -50,8 +63,17 @@ contract ProductSupplyChain is Ownable {
     }
 
     //modifier to make sure specified product exists.
-    modifier productExists(uint256 productId) {
+    modifier uniqueProductExists(uint256 productId) {
         require(STORAGE[productId].productId != 0, "Product does not exist");
+        require(
+            STORAGE[productId].productId != productId,
+            "Product already exists"
+        );
+        _;
+    }
+
+    modifier onlyValidAddress(address user) {
+        require(user != address(0), "Invalid newOwner address"); //validity of the address.
         _;
     }
 
@@ -60,15 +82,28 @@ contract ProductSupplyChain is Ownable {
         administrator = msg.sender; //assigning ownership of contract to the constructor caller.
     }
 
+    function assignSellerRole(
+        address seller
+    ) public onlyAdministrator onlyValidAddress(seller) {
+        SELLER[seller] = true;
+
+        emit SellerAssigned(seller);
+    }
+
     // function to transfer ownership.
     function transferOwnership(
         address newOwner,
         uint256 _productId
-    ) public onlyOwner(_productId) {
-        require(newOwner != address(0), "Invalid newOwner address"); //validity of the address.
+    )
+        private
+        onlyValidAddress(newOwner)
+        onlySeller(newOwner)
+        onlyOwner(_productId)
+    {
         OWNER[_productId][newOwner] = true; //adding the owner of the product in mapping.
         delete OWNER[_productId][msg.sender];
         STORAGE[_productId].currentOwner = newOwner;
+
         emit OwnershipTransferred(_productId, msg.sender, newOwner); //emiting event to signal ownership transfer.
     }
 
@@ -76,26 +111,20 @@ contract ProductSupplyChain is Ownable {
     function createProduct(
         uint256 _productId,
         string memory _name,
-        address _currentOwner,
         uint256 _price
-    ) public onlyAdministrator {
+    ) public onlySeller(msg.sender) uniqueProductExists(_productId) {
         //creating a new product struct with input values.
-        require(
-            STORAGE[_productId].productId != _productId,
-            "Product already exist"
-        );
         Product memory newProduct = Product({
             productId: _productId,
             name: _name,
-            currentOwner: _currentOwner,
+            currentOwner: msg.sender,
             price: _price
         });
 
-        require(_productId != 0); //check to make sure product id is not 0. which is a default return value of uint256 in mapping.
         STORAGE[_productId] = newProduct; //registering new product in storage.
-        OWNER[_productId][_currentOwner] = true; //adding owner-product relation in Owner mapping.
+        OWNER[_productId][msg.sender] = true; //adding owner-product relation in Owner mapping.
 
-        emit ProductCreated(_productId, _currentOwner); //emiting event to signal new product creation.
+        emit ProductCreated(_productId, msg.sender); //emiting event to signal new product creation.
     }
 
     //function to sell a product.
@@ -103,7 +132,12 @@ contract ProductSupplyChain is Ownable {
         uint256 _productId,
         address _to,
         uint256 _price
-    ) public onlyOwner(_productId) productExists(_productId) {
+    )
+        public
+        onlyValidAddress(_to)
+        uniqueProductExists(_productId)
+        onlyOwner(_productId)
+    {
         delete OWNER[_productId][msg.sender]; //deleting previous owner of the product.
         OWNER[_productId][_to] = true; //updating new owner of the product - buyer.
         STORAGE[_productId].currentOwner = _to; //changing owner in storage.
