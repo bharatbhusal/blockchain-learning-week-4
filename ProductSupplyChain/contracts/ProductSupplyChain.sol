@@ -4,7 +4,7 @@ import "./Ownable.sol";
 import "./Sellable.sol";
 
 interface OnlyAdministratorCheckerInterface {
-    function isAdmin(address user) external returns (bool);
+    function isAdmin(address administrator) external returns (bool);
 }
 
 // Main contract inheriting Ownable contract.
@@ -39,12 +39,6 @@ contract ProductSupplyChain is Ownable, Sellable {
     );
 
     event SellerAssigned(address);
-
-    // //modifier to restrict actions only to contract owner.
-    // modifier onlyAdministrator() {
-    //     require(msg.sender == administrator, "Not Administrator");
-    //     _;
-    // }
 
     //modifier to make sure specified product exists.
     modifier productExists(uint256 productId) {

@@ -2,15 +2,12 @@
 pragma solidity 0.8.23;
 
 contract onlyAdministratorChecker {
-    //modifier to restrict actions only to contract owner.
-    modifier onlyAdministrator(address administrator) {
-        require(msg.sender == administrator, "Not Administrator");
-        _;
-    }
+    // event IsAdmin(address user, bool isAdmin);
 
-    function isAdmin(
-        address user
-    ) external view onlyAdministrator(user) returns (bool) {
+    function isAdmin(address administrator) external view returns (bool) {
+        require(tx.origin == administrator, "Not Administrator");
+
+        // emit IsAdmin(msg.sender, true);
         return true;
     }
 }
