@@ -23,7 +23,11 @@ contract ProductSupplyChain is Ownable, Sellable {
         uint256 price;
     }
     // event to emit when new product is created.
-    event ProductCreated(uint256 indexed productId, address indexed owner);
+    event ProductCreated(
+        uint256 indexed productId,
+        address indexed owner,
+        uint256 price
+    );
     // event to emit when product is sold.
     event ProductSold(
         uint256 indexed productId,
@@ -38,7 +42,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         address indexed newOwner
     );
 
-    event SellerAssigned(address);
+    event SellerAssigned(address indexed seller);
 
     //modifier to make sure specified product exists.
     modifier productExists(uint256 productId) {
@@ -108,7 +112,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         STORAGE[_productId] = newProduct; //registering new product in storage.
         OWNER[_productId][msg.sender] = true; //adding owner-product relation in Owner mapping.
 
-        emit ProductCreated(_productId, msg.sender); //emiting event to signal new product creation.
+        emit ProductCreated(_productId, msg.sender, _price); //emiting event to signal new product creation.
     }
 
     //function to sell a product.
@@ -123,9 +127,10 @@ contract ProductSupplyChain is Ownable, Sellable {
         onlySeller(_to)
         onlyOwner(_productId)
     {
-        delete OWNER[_productId][msg.sender]; //deleting previous owner of the product.
-        OWNER[_productId][_to] = true; //updating new owner of the product - buyer.
-        STORAGE[_productId].currentOwner = _to; //changing owner in storage.
+        // delete OWNER[_productId][msg.sender]; //deleting previous owner of the product.
+        // OWNER[_productId][_to] = true; //updating new owner of the product - buyer.
+        // STORAGE[_productId].currentOwner = _to; //changing owner in storage.
+        transferOwnership(_to, _productId);
 
         emit ProductSold(_productId, msg.sender, _to, _price); //emiting event to signal selling of the product
     }
