@@ -1,13 +1,39 @@
 # Sample Hardhat Project
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This project demonstrates a sophisticated smart contract that simulates a basic supply chain process for a product, from creation to the end sale, showcasing advanced Solidity features
 
-Try running some of the following tasks:
-
+### Commands to test, deploy and run node
 ```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
+npm run test
+npm run deploy
+npm run node
 ```
+### Smart contracts:
+- ProductSupplyChain
+- OnlyAdministratorChecker
+- Ownable
+- Sellable
+
+### Events:
+- ProductCreated
+- ProductSold
+- OwnershipTransferred
+- SellerAssigned
+
+### Modifiers:
+- productExists
+- onlyNewProduct
+- onlyValidAddress
+
+### Mappings:
+- STORAGE
+- OWNER
+- SELLER
+
+### Functions:
+- assignSellerRole
+- tranferOwnership
+- createProduct
+- sellProduct
+- getProductDetail
+- isAdmin

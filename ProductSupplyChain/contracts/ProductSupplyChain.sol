@@ -53,7 +53,7 @@ contract ProductSupplyChain is Ownable, Sellable {
     }
 
     //modifier to make sure product already exists.
-    modifier onlynewProduct(uint256 productId) {
+    modifier onlyNewProduct(uint256 productId) {
         require(STORAGE[productId].productId == 0, "Product already exists");
         _;
     }
@@ -110,7 +110,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         uint256 _productId,
         string memory _name,
         uint256 _price
-    ) public onlySeller(msg.sender) onlynewProduct(_productId) {
+    ) public onlySeller(msg.sender) onlyNewProduct(_productId) {
         //product creator should be seller and product id should unique
         //creating a new product struct with input values.
         Product memory newProduct = Product({
