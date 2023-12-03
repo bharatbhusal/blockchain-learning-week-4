@@ -1,15 +1,26 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity 0.8.23;
 
-contract ExternalContractWithAddress {
-    address calculator;
+interface CalculatorInterface {
+    function add() external view returns (int256);
 
-    constructor(address calculatorAddress, int256 x, int256 y) {
-        calculator = calculatorAddress;
-        Calculator myCalculator = Calculator(calculator);
+    function subtract() external view returns (int256);
+
+    function multiply() external view returns (int256);
+
+    function quotient() external view returns (int256);
+
+    function reminder() external view returns (int256);
+}
+
+contract ExternalContractWithAddress {
+    CalculatorInterface calculator;
+
+    constructor(address calculatorAddress) {
+        calculator = CalculatorInterface(calculatorAddress);
     }
 
-    function add() public view returns (int256) {
+    function callAdd() public view returns (int256) {
         return calculator.add();
     }
 }
