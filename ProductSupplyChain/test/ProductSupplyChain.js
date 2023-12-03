@@ -76,7 +76,7 @@ describe("ProductSupplyChain", function () {
 
   describe("Test sellProduct", function () {
     it("Seller can sell product correctly", async function () {
-      const { productSupplyChain, owner, nullAddress, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+      const { productSupplyChain, owner, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
 
       await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
       await productSupplyChain.connect(owner).assignSellerRole(otherAccount2)
@@ -98,7 +98,7 @@ describe("ProductSupplyChain", function () {
     });
 
     it("Seller can't sell not existing product", async function () {
-      const { productSupplyChain, owner, nullAddress, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+      const { productSupplyChain, owner, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
 
       await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
       await productSupplyChain.connect(owner).assignSellerRole(otherAccount2)
@@ -108,7 +108,7 @@ describe("ProductSupplyChain", function () {
     })
 
     it("Seller can sell only their owned product", async function () {
-      const { productSupplyChain, owner, nullAddress, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+      const { productSupplyChain, owner, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
 
       await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
       await productSupplyChain.connect(owner).assignSellerRole(otherAccount2)
@@ -118,4 +118,24 @@ describe("ProductSupplyChain", function () {
       await expect(productSupplyChain.connect(otherAccount1).sellProduct(2, otherAccount2, 999)).to.be.revertedWith("Not Owner");
     })
   });
+
+  describe("Test getProductDetail", function () {
+    it("User can get product correctly", async function () {
+      const { productSupplyChain, owner, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+      await productSupplyChain.connect(otherAccount1).getProductDetail(1);
+    })
+
+    it("User can't get not existing product", async function () {
+      const { productSupplyChain, owner, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+      await expect(productSupplyChain.connect(otherAccount1).getProductDetail(2)).to.be.revertedWith("Product does not exist");
+    })
+  })
 });
