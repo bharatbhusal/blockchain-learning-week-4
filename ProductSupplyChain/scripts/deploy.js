@@ -8,12 +8,18 @@ const hre = require("hardhat");
 
 async function main() {
 
-  const productSupplyChain = await hre.ethers.deployContract("ProductSupplyChain", [], {});
+  const onlyAdministratorChecker = await hre.ethers.deployContract("OnlyAdministratorChecker", [], {});
+  await onlyAdministratorChecker.waitForDeployment();
+
+  console.log(
+    `OnlyAdministratorChecker Contract Deployed as ${onlyAdministratorChecker.target}.`);
+
+  const productSupplyChain = await hre.ethers.deployContract("ProductSupplyChain", [onlyAdministratorChecker.target], {});
 
   await productSupplyChain.waitForDeployment();
 
   console.log(
-    `Contract Deployed.`);
+    `ProductSupplyChain Contract Deployed at ${productSupplyChain.target}.`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
