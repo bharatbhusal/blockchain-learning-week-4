@@ -56,7 +56,7 @@ contract ProductSupplyChain is Ownable, Sellable {
     }
 
     modifier onlyValidAddress(address user) {
-        require(user != address(0), "Invalid newOwner address"); //validity of the address.
+        require(user != address(0), "Invalid address"); //validity of the address.
         _;
     }
 
