@@ -57,13 +57,27 @@ describe("ProductSupplyChain", function () {
     });
   });
 
-  // describe("Test createProduct", function () {
-  //   it("Should create a new Product correctly", async function () {
-  //     const { productSupplyChain, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+  describe("Test createProduct", function () {
+    it("Seller can create a new Product correctly", async function () {
+      const { productSupplyChain, owner, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+      const product = await productSupplyChain.STORAGE(1);
+      const isOwner = await productSupplyChain.OWNER(1, otherAccount1);
+      expect(product.productId).to.equal(1);
+      expect(isOwner).to.equal(true)
+    });
 
-  //     expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n))
-  //   });
-  // });
+    it("Non-seller can't create a new Product", async function () {
+      const { productSupplyChain, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+      await expect(productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n)).to.be.revertedWith("Not a Seller");
+    });
 
-
+    it("Seller can't create a duplicate Product", async function () {
+      const { productSupplyChain, owner, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+      await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n);
+      await expect(productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n)).to.be.revertedWith("Product does not exist");
+    });
+  });
 });
