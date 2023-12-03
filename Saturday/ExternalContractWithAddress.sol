@@ -23,4 +23,20 @@ contract ExternalContractWithAddress {
     function callAdd() public view returns (int256) {
         return calculator.add();
     }
+
+    function callSubtrac() public view returns (int256) {
+        return calculator.subtract();
+    }
+
+    function callMultiply() public view returns (int256) {
+        return calculator.multiply();
+    }
+
+    function callQuotient() public view returns (int256) {
+        return calculator.quotient();
+    }
+
+    function callRemainder() public view returns (int256) {
+        return calculator.reminder();
+    }
 }
