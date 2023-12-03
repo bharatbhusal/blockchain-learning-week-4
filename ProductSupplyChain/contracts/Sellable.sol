@@ -6,6 +6,7 @@ contract Sellable {
     //assigning seller role to users.
     mapping(address => bool) public SELLER;
 
+    // modifier to restrict actions to seller only.
     modifier onlySeller(address user) {
         require(SELLER[user], "Not a Seller");
         _;

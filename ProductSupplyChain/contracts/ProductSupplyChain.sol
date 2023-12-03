@@ -3,14 +3,15 @@ pragma solidity 0.8.23;
 import "./Ownable.sol";
 import "./Sellable.sol";
 
+//interface of external contract
 interface OnlyAdministratorCheckerInterface {
-    function isAdmin(address administrator) external returns (bool);
+    function isAdmin(address administrator) external returns (bool); //function to check admin role.
 }
 
 // Main contract inheriting Ownable contract.
 contract ProductSupplyChain is Ownable, Sellable {
     address public administrator; //owner of the contract.
-    OnlyAdministratorCheckerInterface public OnlyAdministratorChecker;
+    OnlyAdministratorCheckerInterface public OnlyAdministratorChecker; //External contract instance.
 
     //mapping productID to product struct.
     mapping(uint256 => Product) public STORAGE;
@@ -42,6 +43,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         address indexed newOwner
     );
 
+    //event to emit when seller role is assigned.
     event SellerAssigned(address indexed seller);
 
     //modifier to make sure specified product exists.
@@ -50,31 +52,38 @@ contract ProductSupplyChain is Ownable, Sellable {
         _;
     }
 
+    //modifier to make sure product already exists.
     modifier onlynewProduct(uint256 productId) {
-        require(STORAGE[productId].productId == 0, "Product does not exist");
+        require(STORAGE[productId].productId == 0, "Product already exists");
         _;
     }
 
+    //modifier to make sure user address is valid.
     modifier onlyValidAddress(address user) {
-        require(user != address(0), "Invalid address"); //validity of the address.
+        require(user != address(0), "Invalid address");
         _;
     }
 
     //constructor of main contract.
     constructor(address onlyAdministratorChecker) {
         administrator = msg.sender; //assigning ownership of contract to the constructor caller.
+        //create the instance of external contract.
         OnlyAdministratorChecker = OnlyAdministratorCheckerInterface(
             onlyAdministratorChecker
         );
     }
 
+    //function to assign seller role to user with valid address.
     function assignSellerRole(address seller) public onlyValidAddress(seller) {
+        //only administrator can assign.
         require(
             OnlyAdministratorChecker.isAdmin(administrator),
             "Not Administrator"
         );
+        //updating SELLER mapping
         SELLER[seller] = true;
 
+        //emiting seller assignmnet action.
         emit SellerAssigned(seller);
     }
 
@@ -84,15 +93,16 @@ contract ProductSupplyChain is Ownable, Sellable {
         uint256 _productId
     )
         private
-        onlyValidAddress(newOwner)
-        onlySeller(newOwner)
-        onlyOwner(_productId)
+        onlyValidAddress(newOwner) //newOwner should have valid adderss.
+        onlySeller(newOwner) //newOwner should be seller.
+        onlyOwner(_productId) //this function caller should be the owner of the product id.
     {
         OWNER[_productId][newOwner] = true; //adding the owner of the product in mapping.
-        delete OWNER[_productId][msg.sender];
-        STORAGE[_productId].currentOwner = newOwner;
+        delete OWNER[_productId][msg.sender]; //deleting the old owner of the product.
+        STORAGE[_productId].currentOwner = newOwner; //storing new owner in STORAGE mapping.
 
-        emit OwnershipTransferred(_productId, msg.sender, newOwner); //emiting event to signal ownership transfer.
+        //emitting ownership transfer action.
+        emit OwnershipTransferred(_productId, msg.sender, newOwner);
     }
 
     // function to create a new product.
@@ -101,6 +111,7 @@ contract ProductSupplyChain is Ownable, Sellable {
         string memory _name,
         uint256 _price
     ) public onlySeller(msg.sender) onlynewProduct(_productId) {
+        //product creator should be seller and product id should unique
         //creating a new product struct with input values.
         Product memory newProduct = Product({
             productId: _productId,
@@ -112,7 +123,8 @@ contract ProductSupplyChain is Ownable, Sellable {
         STORAGE[_productId] = newProduct; //registering new product in storage.
         OWNER[_productId][msg.sender] = true; //adding owner-product relation in Owner mapping.
 
-        emit ProductCreated(_productId, msg.sender, _price); //emiting event to signal new product creation.
+        //emiting event to signal new product creation.
+        emit ProductCreated(_productId, msg.sender, _price);
     }
 
     //function to sell a product.
@@ -127,17 +139,16 @@ contract ProductSupplyChain is Ownable, Sellable {
         onlySeller(_to)
         onlyOwner(_productId)
     {
-        // delete OWNER[_productId][msg.sender]; //deleting previous owner of the product.
-        // OWNER[_productId][_to] = true; //updating new owner of the product - buyer.
-        // STORAGE[_productId].currentOwner = _to; //changing owner in storage.
-        transferOwnership(_to, _productId);
+        transferOwnership(_to, _productId); //transfering the ownership of product from seller to buyer.
 
         emit ProductSold(_productId, msg.sender, _to, _price); //emiting event to signal selling of the product
     }
 
+    //function to get the detail of product
     function getProductDetail(
         uint256 _productId
     ) public view productExists(_productId) returns (Product memory) {
+        //product should exist in STORAGE.
         return STORAGE[_productId];
     }
 }
