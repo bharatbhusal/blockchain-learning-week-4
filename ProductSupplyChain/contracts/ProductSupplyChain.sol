@@ -1,32 +1,16 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity 0.8.23;
+import "./Ownable.sol";
+import "./Sellable.sol";
 
-//Ownership control of the product.
-contract Ownable {
-    //mapping storing the owner of given product id.
-    mapping(uint256 => mapping(address => bool)) public OWNER;
-
-    // modifier to restrict actions to product owner only.
-    modifier onlyOwner(uint256 productId) {
-        require(OWNER[productId][msg.sender], "Not Owner");
-        _;
-    }
-}
-
-//Seller role control of the user.
-contract Sellable {
-    //assigning seller role to users.
-    mapping(address => bool) public SELLER;
-
-    modifier onlySeller(address user) {
-        require(SELLER[user], "Not a Seller");
-        _;
-    }
+interface OnlyAdministratorCheckerInterface {
+    function isAdmin(address user) external returns (bool);
 }
 
 // Main contract inheriting Ownable contract.
 contract ProductSupplyChain is Ownable, Sellable {
     address public administrator; //owner of the contract.
+    OnlyAdministratorCheckerInterface public OnlyAdministratorChecker;
 
     //mapping productID to product struct.
     mapping(uint256 => Product) public STORAGE;
@@ -56,11 +40,11 @@ contract ProductSupplyChain is Ownable, Sellable {
 
     event SellerAssigned(address);
 
-    //modifier to restrict actions only to contract owner.
-    modifier onlyAdministrator() {
-        require(msg.sender == administrator, "Not Administrator");
-        _;
-    }
+    // //modifier to restrict actions only to contract owner.
+    // modifier onlyAdministrator() {
+    //     require(msg.sender == administrator, "Not Administrator");
+    //     _;
+    // }
 
     //modifier to make sure specified product exists.
     modifier productExists(uint256 productId) {
@@ -79,13 +63,18 @@ contract ProductSupplyChain is Ownable, Sellable {
     }
 
     //constructor of main contract.
-    constructor() {
+    constructor(address onlyAdministratorChecker) {
         administrator = msg.sender; //assigning ownership of contract to the constructor caller.
+        OnlyAdministratorChecker = OnlyAdministratorCheckerInterface(
+            onlyAdministratorChecker
+        );
     }
 
-    function assignSellerRole(
-        address seller
-    ) public onlyAdministrator onlyValidAddress(seller) {
+    function assignSellerRole(address seller) public onlyValidAddress(seller) {
+        require(
+            OnlyAdministratorChecker.isAdmin(administrator),
+            "Not Administrator"
+        );
         SELLER[seller] = true;
 
         emit SellerAssigned(seller);
