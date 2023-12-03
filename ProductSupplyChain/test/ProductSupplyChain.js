@@ -18,14 +18,28 @@ describe("ProductSupplyChain", function () {
     await productSupplyChain.waitForDeployment();
 
     // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await ethers.getSigners();
+    const [owner, otherAccount1, otherAccount2] = await ethers.getSigners();
 
-    return { productSupplyChain, owner, otherAccount };
+    return { productSupplyChain, owner, otherAccount1, otherAccount2 };
   }
 
-  describe("Deployment", function () {
+  describe("Test Deployment", function () {
     it("Should deploy correctly", async function () {
-      const { productSupplyChain } = await loadFixture(deployProductSupplyChainFixture);
+      await loadFixture(deployProductSupplyChainFixture);
     });
+  });
+
+  describe("Test assignSellerRole", function () {
+    it("Owner can assign Seller role to user", async function () {
+      const { productSupplyChain, owner, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
+      expect(await productSupplyChain.connect(owner).assignSellerRole(otherAccount1));
+    });
+
+    it("Non-owner can't assign Seller role to user", async function () {
+      const { productSupplyChain, owner, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+      await expect(productSupplyChain.connect(otherAccount1).assignSellerRole(otherAccount2)).to.be.revertedWith("Not Administrator");
+    });
+
+
   });
 });
