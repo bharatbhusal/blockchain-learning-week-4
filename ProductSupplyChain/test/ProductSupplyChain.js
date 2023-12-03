@@ -50,13 +50,6 @@ describe("ProductSupplyChain", function () {
 
   });
 
-  describe("Test transferOwnership", function () {
-    it("Should transfer Ownership correctly", async function () {
-      const { productSupplyChain } = await loadFixture(deployProductSupplyChainFixture);
-
-    });
-  });
-
   describe("Test createProduct", function () {
     it("Seller can create a new Product correctly", async function () {
       const { productSupplyChain, owner, otherAccount1 } = await loadFixture(deployProductSupplyChainFixture);
@@ -79,5 +72,50 @@ describe("ProductSupplyChain", function () {
       await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n);
       await expect(productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n)).to.be.revertedWith("Product does not exist");
     });
+  });
+
+  describe("Test sellProduct", function () {
+    it("Seller can sell product correctly", async function () {
+      const { productSupplyChain, owner, nullAddress, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount2)
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+
+      expect(await productSupplyChain.connect(otherAccount1).sellProduct(1, otherAccount2, 500));
+
+      const isOwner = await productSupplyChain.OWNER(1, otherAccount2);
+      expect(isOwner).to.equal(true)
+    });
+
+    it("Seller can't sell product to non-seller", async function () {
+      const { productSupplyChain, owner, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+
+      await expect(productSupplyChain.connect(otherAccount1).sellProduct(1, otherAccount2, 500)).to.be.revertedWith("Not a Seller");
+    });
+
+    it("Seller can't sell not existing product", async function () {
+      const { productSupplyChain, owner, nullAddress, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount2)
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+
+      await expect(productSupplyChain.connect(otherAccount1).sellProduct(2, otherAccount2, 500)).to.be.revertedWith("Product does not exist");
+    })
+
+    it("Seller can sell only their owned product", async function () {
+      const { productSupplyChain, owner, nullAddress, otherAccount1, otherAccount2 } = await loadFixture(deployProductSupplyChainFixture);
+
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount1)
+      await productSupplyChain.connect(owner).assignSellerRole(otherAccount2)
+      expect(await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n));
+      expect(await productSupplyChain.connect(otherAccount2).createProduct(2, "Twited Love", 999n));
+
+      await expect(productSupplyChain.connect(otherAccount1).sellProduct(2, otherAccount2, 999)).to.be.revertedWith("Not Owner");
+    })
   });
 });

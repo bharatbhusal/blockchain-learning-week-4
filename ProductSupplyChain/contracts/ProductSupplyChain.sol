@@ -137,7 +137,7 @@ contract ProductSupplyChain is Ownable, Sellable {
 
     function getProductDetail(
         uint256 _productId
-    ) public view returns (Product memory) {
+    ) public view productExists(_productId) returns (Product memory) {
         return STORAGE[_productId];
     }
 }
