@@ -7,15 +7,12 @@
     "deploy": "npx hardhat run scripts/deploy.js --network localhost",
     "test": "npx hardhat test",
     "node": "npx hardhat node"
-},
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "hardhat": "^2.19.1",
-    "init": "^0.1.2"
-  },
-  "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0"
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.2"
   }
 }
