@@ -105,7 +105,7 @@ describe("ProductSupplyChain", function () {
       await productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n);
 
       // Expect seller to be reverted when trying to create a duplicate product with the same productId
-      await expect(productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n)).to.be.revertedWith("Product does not exist");
+      await expect(productSupplyChain.connect(otherAccount1).createProduct(1, "KoW", 499n)).to.be.revertedWith("Product already exists");
     });
   });
 
